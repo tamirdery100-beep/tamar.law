@@ -964,31 +964,57 @@
     cursor: pointer;
     user-select: none;
   }
-  /* Small "expand" hint chevron in the corner of clickable cards */
+  /* "Click to expand" pill chip — bottom-left corner of clickable cards (in RTL: visual left) */
   .practice-card[role="button"]::after {
-    content: '';
+    content: 'לחצו לפרטים והרחבה';
     position: absolute;
-    top: 22px;
+    bottom: 22px;
     inset-inline-end: 22px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--bg-deep);
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23163E62' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5M12 19l-7-7 7-7'/></svg>");
+    padding: 8px 14px 8px 34px;
+    background-color: var(--bg-deep);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23163E62' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5M12 19l-7-7 7-7'/></svg>");
     background-repeat: no-repeat;
-    background-position: center;
-    background-size: 14px;
-    opacity: 0.6;
+    background-position: 12px center;
+    background-size: 12px;
+    border-radius: 50px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--copper-deep);
+    letter-spacing: 0.02em;
     transition: all 0.4s var(--ease);
     z-index: 2;
+    white-space: nowrap;
+    pointer-events: none;
   }
   .practice-card[role="button"]:hover::after {
     background-color: var(--bg);
-    opacity: 1;
-    transform: translateX(-3px);
+    color: var(--copper-deep);
+    transform: translateX(-4px);
+    box-shadow: 0 6px 16px rgba(20, 37, 61, 0.22);
   }
-  /* Hide hint on the wide "notary" card since it already has a button */
+  /* On dark hover state of the card, chip turns light/cream */
+  .practice-card:hover[role="button"]::after {
+    background-color: var(--bg-soft);
+  }
+  /* Hide hint on the wide "notary" card since it has its own button */
   .practice-card[style*="span 2"]::after { display: none; }
+  /* Add bottom padding to cards so the description doesn't crowd the chip */
+  .practice-card[role="button"] {
+    padding-bottom: 70px;
+  }
+
+  @media (max-width: 720px) {
+    .practice-card[role="button"]::after {
+      bottom: 18px;
+      inset-inline-end: 18px;
+      padding: 7px 12px 7px 30px;
+      font-size: 11.5px;
+      background-position: 11px center;
+      background-size: 11px;
+    }
+    .practice-card[role="button"] { padding-bottom: 64px; }
+  }
 
   /* ============================================
      7.5 PRACTICE MODAL (accessible dialog)
