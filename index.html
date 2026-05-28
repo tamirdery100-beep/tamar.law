@@ -27,12 +27,13 @@
     --bg: #F2EDE3;             /* warm cream (keeps warmth) */
     --bg-soft: #FBF7EE;        /* lighter card surface */
     --bg-deep: #E6E1D2;        /* deeper warm cream */
-    --ink: #14253D;            /* deep ocean navy — primary text */
-    --ink-soft: #2C4868;       /* secondary text */
-    --ink-muted: #6B8194;      /* slate-blue muted */
-    --copper: #2D5A85;         /* primary brand: rich ocean blue */
-    --copper-deep: #163E62;    /* deepest blue — hover, dark surfaces */
-    --copper-soft: #4F7AA5;    /* medium blue */
+    --ink: #14253D;            /* deep ocean navy — primary text — AAA contrast on cream */
+    --ink-soft: #2C4868;       /* secondary text — passes AAA on cream */
+    --ink-muted: #4B6478;      /* slate muted — 5.4:1 on cream (AA pass) */
+    --copper: #2D5A85;         /* primary brand: rich ocean blue — 6:1 on cream (AA pass) */
+    --copper-deep: #163E62;    /* deepest blue — AAA on cream */
+    --copper-soft: #88A8C8;    /* light blue for use on DARK bg — 7:1 on ink (AAA) */
+    --focus: #FFB341;          /* warm amber focus ring — high visibility on all backgrounds */
     --champagne: #C8DCE9;      /* powder blue surface accent */
     --rose: #C2664F;           /* terracotta from the painting roofs */
     --rose-deep: #9B4730;      /* deeper terracotta */
@@ -65,7 +66,12 @@
      ============================================ */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  /* Root font-size in % to honor user's browser zoom & accessibility settings */
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    font-size: 100%; /* 1rem = user's base, allowing accessible zoom */
+  }
 
   body {
     font-family: var(--sans);
@@ -73,7 +79,7 @@
     color: var(--ink);
     background: var(--bg);
     line-height: 1.65;
-    font-size: 16px;
+    font-size: 1rem;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -92,6 +98,75 @@
   }
 
   ::selection { background: var(--copper); color: var(--bg); }
+
+  /* ============================================
+     2.5 ACCESSIBILITY — Skip link, focus, screen-reader utils
+     ============================================ */
+
+  /* Skip to main content — first focusable element, hidden until focused */
+  .skip-link {
+    position: absolute;
+    top: 0;
+    inset-inline-start: 16px;
+    transform: translateY(-150%);
+    z-index: 1000;
+    padding: 14px 26px;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 0 0 var(--radius) var(--radius);
+    text-decoration: none;
+    transition: transform 0.25s var(--ease);
+    box-shadow: var(--shadow);
+  }
+  .skip-link:focus,
+  .skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  /* Visually hidden but accessible to screen readers */
+  .sr-only {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Global focus-visible — high-contrast amber ring works on every bg in palette */
+  *:focus { outline: none; }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 4px;
+    transition: outline-offset 0.15s var(--ease);
+  }
+
+  /* Buttons get more breathing room around the ring */
+  .btn:focus-visible,
+  .nav-cta:focus-visible {
+    outline-offset: 4px;
+  }
+
+  /* Cards & contact methods get a softer treatment that doesn't break their pill shape */
+  .practice-card:focus-visible,
+  .contact-method:focus-visible,
+  .testimonial-card:focus-visible,
+  .why-item:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
 
   /* ============================================
      3. LAYOUT UTILITIES
@@ -698,7 +773,7 @@
     font-weight: 300;
   }
   .cta-strip p {
-    color: rgba(245, 240, 230, 0.88);
+    color: rgba(255, 252, 246, 0.95);
     font-size: 1rem;
     line-height: 1.6;
     max-width: 560px;
@@ -884,6 +959,245 @@
     transition: color 0.4s;
   }
 
+  /* Practice cards become focusable buttons */
+  .practice-card[role="button"] {
+    cursor: pointer;
+    user-select: none;
+  }
+  /* Small "expand" hint chevron in the corner of clickable cards */
+  .practice-card[role="button"]::after {
+    content: '';
+    position: absolute;
+    top: 22px;
+    inset-inline-end: 22px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-deep);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23163E62' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5M12 19l-7-7 7-7'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px;
+    opacity: 0.6;
+    transition: all 0.4s var(--ease);
+    z-index: 2;
+  }
+  .practice-card[role="button"]:hover::after {
+    background-color: var(--bg);
+    opacity: 1;
+    transform: translateX(-3px);
+  }
+  /* Hide hint on the wide "notary" card since it already has a button */
+  .practice-card[style*="span 2"]::after { display: none; }
+
+  /* ============================================
+     7.5 PRACTICE MODAL (accessible dialog)
+     ============================================ */
+  .practice-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s var(--ease), visibility 0.3s var(--ease);
+  }
+  .practice-modal.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .practice-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 37, 61, 0.62);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .practice-modal-content {
+    position: relative;
+    background: var(--bg-soft);
+    border-radius: var(--radius-lg);
+    max-width: 720px;
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(20, 37, 61, 0.35);
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.35s var(--ease);
+    padding: 40px 44px;
+  }
+  .practice-modal.open .practice-modal-content {
+    transform: translateY(0) scale(1);
+  }
+  .practice-modal-close {
+    position: absolute;
+    top: 18px;
+    inset-inline-start: 18px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.25s var(--ease);
+    z-index: 2;
+  }
+  .practice-modal-close:hover {
+    background: var(--ink);
+    color: var(--bg);
+    transform: rotate(90deg);
+  }
+  .practice-modal-close svg { width: 18px; height: 18px; }
+
+  .practice-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 24px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--line);
+  }
+  .practice-modal-header .icon-circle {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .practice-modal-header .icon-circle svg { width: 34px; height: 34px; }
+  .practice-modal-title {
+    font-family: var(--serif);
+    font-size: clamp(1.5rem, 3.2vw, 2rem);
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .practice-modal-intro {
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    line-height: 1.75;
+    margin-bottom: 32px;
+  }
+
+  .practice-modal h3 {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin-bottom: 18px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .practice-modal h3::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--copper);
+  }
+
+  .practice-modal-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px;
+    counter-reset: step;
+  }
+  .practice-modal-steps li {
+    counter-increment: step;
+    position: relative;
+    padding-inline-start: 52px;
+    padding-block: 14px;
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    border-bottom: 1px solid var(--line);
+  }
+  .practice-modal-steps li:last-child { border-bottom: 0; }
+  .practice-modal-steps li::before {
+    content: counter(step, decimal);
+    position: absolute;
+    inset-inline-start: 0;
+    top: 14px;
+    width: 36px;
+    height: 36px;
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .practice-modal-review {
+    background: var(--bg-deep);
+    border-inline-start: 3px solid var(--copper);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 22px 26px;
+    margin-bottom: 28px;
+  }
+  .practice-modal-review-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--copper-deep);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .practice-modal-review blockquote {
+    font-family: var(--serif);
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: var(--ink);
+    font-style: italic;
+    margin: 0 0 10px;
+    quotes: none;
+  }
+  .practice-modal-review cite {
+    font-style: normal;
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+  }
+  .practice-modal-review cite strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .practice-modal-cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .practice-modal-cta .btn { flex: 1; min-width: 180px; }
+
+  /* Lock body scroll when modal is open */
+  body.modal-open { overflow: hidden; }
+
+  @media (max-width: 720px) {
+    .practice-modal { padding: 0; align-items: stretch; }
+    .practice-modal-content { padding: 26px 22px; max-height: 100vh; border-radius: 0; }
+    .practice-modal-close { top: 12px; inset-inline-start: 12px; width: 38px; height: 38px; }
+    .practice-modal-header { flex-direction: column; align-items: flex-start; gap: 14px; padding-bottom: 20px; margin-bottom: 22px; }
+    .practice-modal-header .icon-circle { width: 56px; height: 56px; }
+    .practice-modal-header .icon-circle svg { width: 26px; height: 26px; }
+    .practice-modal-steps li { padding-inline-start: 46px; font-size: 0.94rem; }
+    .practice-modal-steps li::before { width: 32px; height: 32px; font-size: 0.85rem; }
+    .practice-modal-cta { flex-direction: column; }
+    .practice-modal-cta .btn { width: 100%; min-width: 0; }
+  }
+
   /* ============================================
      8. SECTION: WHY CHOOSE
      ============================================ */
@@ -910,7 +1224,7 @@
   .why .eyebrow::before { background: var(--copper-soft); }
   .why .section-title { color: var(--bg); }
   .why .section-title em { color: var(--copper-soft); }
-  .why .section-lead { color: rgba(245, 237, 224, 0.72); }
+  .why .section-lead { color: rgba(245, 237, 224, 0.88); }
 
   .why-inner {
     display: grid;
@@ -957,7 +1271,7 @@
     font-weight: 500;
   }
   .why-item p {
-    color: rgba(245, 237, 224, 0.7);
+    color: rgba(245, 237, 224, 0.88);
     font-size: 0.94rem;
     line-height: 1.65;
   }
@@ -1101,8 +1415,11 @@
     line-height: 1.65;
     color: var(--ink);
     font-weight: 400;
-    margin-bottom: 22px;
+    margin: 0 0 22px;
+    padding: 0;
+    border: 0;
     flex-grow: 1;
+    quotes: none;
   }
   .testimonial-author {
     display: flex;
@@ -1280,7 +1597,7 @@
     font-size: 1.05rem;
   }
   .footer-desc {
-    color: rgba(245, 237, 224, 0.6);
+    color: rgba(245, 237, 224, 0.82);
     font-size: 0.92rem;
     line-height: 1.7;
     max-width: 380px;
@@ -1296,20 +1613,21 @@
   }
   .footer-col ul { list-style: none; display: grid; gap: 12px; }
   .footer-col a {
-    color: rgba(245, 237, 224, 0.7);
+    color: rgba(245, 237, 224, 0.88);
     font-size: 14px;
     transition: color 0.3s;
+    border-radius: 2px;
   }
   .footer-col a:hover { color: var(--copper-soft); }
   .footer-bottom {
     padding-top: 26px;
-    border-top: 1px solid rgba(245, 237, 224, 0.1);
+    border-top: 1px solid rgba(245, 237, 224, 0.18);
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 14px;
     font-size: 13px;
-    color: rgba(245, 237, 224, 0.5);
+    color: rgba(245, 237, 224, 0.78);
   }
 
   /* Floating WhatsApp button */
@@ -1612,27 +1930,43 @@
     .practice-card:hover { transform: none; }
   }
 
+  /* Honor user's motion preference — disable parallax, scroll reveals,
+     heavy hover transforms; keep functional focus/state transitions instant */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
+    .reveal { opacity: 1 !important; transform: none !important; }
+    .hero-portrait { transform: none !important; }
+    .practice-card:hover,
+    .team-member:hover,
+    .testimonial-card:hover,
+    .contact-method:hover,
+    .why-item:hover,
+    .btn:hover { transform: none !important; }
+    html { scroll-behavior: auto; }
   }
 </style>
 </head>
 <body>
 
+<!-- Skip to main content — first focusable element for keyboard & screen reader users -->
+<a href="#main-content" class="skip-link">דלגו לתוכן המרכזי</a>
+
 <!-- ================ NAV ================ -->
-<header class="nav" id="nav">
+<header class="nav" id="nav" role="banner">
   <div class="container nav-inner">
-    <a href="#" class="logo" aria-label="תמר שמואלי משרד עורכי דין">
-      <img class="logo-mark" src="logo-mark.png" alt="לוגו תמר שמואלי" />
+    <a href="#" class="logo" aria-label="תמר שמואלי – משרד עורכי דין ונוטריון, חזרה לעמוד הבית">
+      <img class="logo-mark" src="logo-mark.png" alt="" role="presentation" />
       <span class="logo-text">
         <span class="logo-name">תמר שמואלי</span>
         <span class="logo-sub">משרד עורכי דין ונוטריון</span>
       </span>
     </a>
-    <nav>
+    <nav aria-label="ניווט ראשי">
       <ul class="nav-links" id="navLinks">
         <li><a href="#about">אודות</a></li>
         <li><a href="#practice">תחומי התמחות</a></li>
@@ -1642,20 +1976,22 @@
         <li><a href="#contact">יצירת קשר</a></li>
       </ul>
     </nav>
-    <a href="tel:0507724404" class="nav-cta">לתיאום שיחה</a>
-    <button class="menu-toggle" id="menuToggle" aria-label="פתח תפריט"><span></span></button>
+    <a href="tel:0507724404" class="nav-cta" aria-label="תיאום שיחה טלפונית — חיוג ל-0507724404">לתיאום שיחה</a>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="פתיחה וסגירה של תפריט הניווט" aria-expanded="false" aria-controls="navLinks"><span aria-hidden="true"></span></button>
   </div>
 </header>
 
+<main id="main-content" tabindex="-1">
+
 <!-- ================ HERO ================ -->
-<section class="hero">
+<section class="hero" aria-labelledby="heroTitle">
   <div class="container hero-inner">
     <div class="hero-content reveal">
       <div class="hero-badge">
         <span class="dot"></span>
         <span>22+ שנות ניסיון בליווי משפטי בוטיק</span>
       </div>
-      <h1 class="hero-title">
+      <h1 class="hero-title" id="heroTitle">
         משפט שמרגיש <em>אנושי</em>.<br />
         תוצאות שמחזיקות <em>מעמד</em>.
       </h1>
@@ -1666,7 +2002,7 @@
       <div class="hero-ctas">
         <a href="#contact" class="btn btn-primary">
           לקביעת פגישת ייעוץ
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
         <a href="#practice" class="btn btn-outline">תחומי התמחות</a>
       </div>
@@ -1687,11 +2023,11 @@
     </div>
 
     <div class="hero-portrait reveal reveal-delay-2">
-      <img src="tamar.jpg" alt="עו״ד תמר שמואלי" onerror="this.outerHTML='<div class=\'hero-portrait-placeholder\'>ת״ש</div>'" />
+      <img src="tamar.jpg" alt="תצלום פורטרט של עורכת הדין תמר שמואלי, יושבת במשרדה בלבוש עסקי" onerror="this.outerHTML='<div class=\'hero-portrait-placeholder\' role=\'img\' aria-label=\'תמר שמואלי\'>ת״ש</div>'" />
       <div class="frame"></div>
       <div class="hero-portrait-card">
         <div class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2l2.5 6.5L22 9l-5.5 4.8L18 21l-6-3.5L6 21l1.5-7.2L2 9l7.5-.5L12 2z"/>
           </svg>
         </div>
@@ -1709,7 +2045,7 @@
 <section class="section about" id="about">
   <div class="container about-inner">
     <div class="about-image reveal">
-      <img src="tamar.jpg" alt="עו״ד תמר שמואלי" onerror="this.outerHTML='<div class=\'about-image-placeholder\'>ת״ש</div>'" />
+      <img src="tamar.jpg" alt="תצלום פורטרט נוסף של תמר שמואלי" onerror="this.outerHTML='<div class=\'about-image-placeholder\' role=\'img\' aria-label=\'תמר שמואלי\'>ת״ש</div>'" />
     </div>
     <div class="about-content reveal reveal-delay-2">
       <span class="eyebrow">אודות</span>
@@ -1733,9 +2069,9 @@
       <div class="inline-cta">
         <a href="tel:0507724404" class="btn btn-primary">
           לתיאום שיחה אישית
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
-        <a href="https://wa.me/972507724404" target="_blank" rel="noopener" class="btn btn-outline">בוואטסאפ</a>
+        <a href="https://wa.me/972507724404" target="_blank" rel="noopener noreferrer" class="btn btn-outline" aria-label="שליחת הודעת וואטסאפ למשרד, נפתח בחלון חדש">בוואטסאפ</a>
         <span class="inline-cta-note"><strong>זמינות גבוהה</strong> · מענה תוך 24 שעות</span>
       </div>
     </div>
@@ -1759,10 +2095,10 @@
     <div class="practice-grid">
 
       <!-- Card 1: Apartment Sale/Purchase -->
-      <article class="practice-card reveal reveal-delay-1">
+      <article class="practice-card reveal reveal-delay-1" role="button" tabindex="0" data-practice="apartments" aria-label="פרטים נוספים על ייצוג במכר ורכישת דירות יד שנייה">
         <span class="practice-card-num">01</span>
         <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 11l9-8 9 8M5 10v10h14V10"/>
             <path d="M10 20v-6h4v6"/>
           </svg>
@@ -1772,10 +2108,10 @@
       </article>
 
       <!-- Card 2: Commercial Real Estate -->
-      <article class="practice-card reveal reveal-delay-2">
+      <article class="practice-card reveal reveal-delay-2" role="button" tabindex="0" data-practice="commercial" aria-label="פרטים נוספים על ייצוג במקרקעין מסחריים">
         <span class="practice-card-num">02</span>
         <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="7" width="18" height="13" rx="1"/>
             <path d="M8 7V4h8v3M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/>
           </svg>
@@ -1785,10 +2121,10 @@
       </article>
 
       <!-- Card 3: Real Estate Taxation -->
-      <article class="practice-card reveal reveal-delay-3">
+      <article class="practice-card reveal reveal-delay-3" role="button" tabindex="0" data-practice="tax" aria-label="פרטים נוספים על מיסוי מקרקעין וייעוץ מס">
         <span class="practice-card-num">03</span>
         <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="4" y="3" width="16" height="18" rx="2"/>
             <path d="M8 7h8M8 11h8M8 15h5"/>
             <circle cx="17" cy="16" r="2"/>
@@ -1799,10 +2135,10 @@
       </article>
 
       <!-- Card 4: Money agreements & estate -->
-      <article class="practice-card reveal reveal-delay-1">
+      <article class="practice-card reveal reveal-delay-1" role="button" tabindex="0" data-practice="estate" aria-label="פרטים נוספים על הסכמי ממון וחלוקת עיזבון">
         <span class="practice-card-num">04</span>
         <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9"/>
             <path d="M12 7v10M9 9.5c0-1 1-2 3-2s3 1 3 2-1 1.5-3 2.5-3 1.5-3 2.5 1 2 3 2 3-1 3-2"/>
           </svg>
@@ -1812,10 +2148,10 @@
       </article>
 
       <!-- Card 5: Power of Attorney & Wills -->
-      <article class="practice-card reveal reveal-delay-2">
+      <article class="practice-card reveal reveal-delay-2" role="button" tabindex="0" data-practice="wills" aria-label="פרטים נוספים על ייפוי כוח מתמשך וצוואות">
         <span class="practice-card-num">05</span>
         <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 20h14M7 16l9-9 3 3-9 9-3-3z M14 5l3 3"/>
             <path d="M9 16H6v-3"/>
           </svg>
@@ -1825,10 +2161,10 @@
       </article>
 
       <!-- Card 6: Urban Renewal & TAMA 38 -->
-      <article class="practice-card reveal reveal-delay-3">
+      <article class="practice-card reveal reveal-delay-3" role="button" tabindex="0" data-practice="urban" aria-label="פרטים נוספים על התחדשות עירונית ותמא 38">
         <span class="practice-card-num">06</span>
         <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 21h18M6 21V9l6-4 6 4v12"/>
             <path d="M9 21V13h6v8M12 9v0M10 17h4"/>
           </svg>
@@ -1838,10 +2174,10 @@
       </article>
 
       <!-- Card 7: Contractor Purchase -->
-      <article class="practice-card reveal reveal-delay-4">
+      <article class="practice-card reveal reveal-delay-4" role="button" tabindex="0" data-practice="contractor" aria-label="פרטים נוספים על ייצוג ברכישה מקבלן">
         <span class="practice-card-num">07</span>
         <div class="icon-circle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2a4 4 0 014 4v1H8V6a4 4 0 014-4z"/>
             <path d="M5 9h14l-1 12H6L5 9zM10 13v4M14 13v4"/>
           </svg>
@@ -1851,9 +2187,9 @@
       </article>
 
       <!-- Card 8 (Notary callout) -->
-      <article class="practice-card reveal reveal-delay-5" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; gap: 30px; min-height: auto;">
+      <article class="practice-card reveal reveal-delay-5" role="button" tabindex="0" data-practice="notary" aria-label="פרטים נוספים על שירותי נוטריון" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; gap: 30px; min-height: auto;">
         <div class="icon-circle" style="width: 80px; height: 80px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 38px; height: 38px;">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 38px; height: 38px;">
             <circle cx="12" cy="9" r="5"/>
             <path d="M12 14v7M8 21h8"/>
             <path d="M12 9l2 2"/>
@@ -1870,6 +2206,35 @@
   </div>
 </section>
 
+<!-- ================ PRACTICE MODAL (accessible dialog) ================ -->
+<div class="practice-modal" id="practiceModal" role="dialog" aria-modal="true" aria-labelledby="practiceModalTitle" aria-hidden="true">
+  <div class="practice-modal-overlay" data-close></div>
+  <div class="practice-modal-content" role="document">
+    <button class="practice-modal-close" type="button" aria-label="סגירת החלון" data-close>
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <header class="practice-modal-header">
+      <div class="icon-circle" id="practiceModalIcon" aria-hidden="true"></div>
+      <h2 class="practice-modal-title" id="practiceModalTitle">כותרת התחום</h2>
+    </header>
+    <p class="practice-modal-intro" id="practiceModalIntro"></p>
+    <h3>איך התהליך אצלי עובד</h3>
+    <ol class="practice-modal-steps" id="practiceModalSteps"></ol>
+    <div class="practice-modal-review" id="practiceModalReview" hidden>
+      <div class="practice-modal-review-label">לקוח/ה ממליצ/ה</div>
+      <blockquote id="practiceModalReviewQuote"></blockquote>
+      <cite id="practiceModalReviewAuthor"></cite>
+    </div>
+    <div class="practice-modal-cta">
+      <a href="tel:0507724404" class="btn btn-primary" aria-label="תיאום שיחה טלפונית, חיוג ל-0507724404">
+        לתיאום שיחה
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </a>
+      <a href="https://wa.me/972507724404" target="_blank" rel="noopener noreferrer" class="btn btn-outline" aria-label="שליחת הודעת וואטסאפ, נפתח בחלון חדש">בוואטסאפ</a>
+    </div>
+  </div>
+</div>
+
 <!-- ================ CTA STRIP ================ -->
 <section class="cta-strip" aria-labelledby="ctaStripTitle">
   <div class="container cta-strip-inner">
@@ -1880,9 +2245,9 @@
     <div class="cta-strip-buttons">
       <a href="tel:0507724404" class="btn btn-primary">
         לתיאום שיחה: 050-772-4404
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </a>
-      <a href="https://wa.me/972507724404" target="_blank" rel="noopener" class="btn btn-outline">
+      <a href="https://wa.me/972507724404" target="_blank" rel="noopener noreferrer" class="btn btn-outline" aria-label="שליחת הודעה בוואטסאפ למספר 0507724404, נפתח בחלון חדש">
         שליחת הודעה בוואטסאפ
       </a>
     </div>
@@ -1911,7 +2276,7 @@
       </div>
       <div class="why-item reveal reveal-delay-2">
         <div class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><path d="M20 6L9 17l-5-5"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><path d="M20 6L9 17l-5-5"/></svg>
         </div>
         <div>
           <h3>זמינות וליווי אישי</h3>
@@ -1920,7 +2285,7 @@
       </div>
       <div class="why-item reveal reveal-delay-3">
         <div class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><path d="M12 2a4 4 0 014 4v1H8V6a4 4 0 014-4zM5 9h14l-1 12H6L5 9z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><path d="M12 2a4 4 0 014 4v1H8V6a4 4 0 014-4zM5 9h14l-1 12H6L5 9z"/></svg>
         </div>
         <div>
           <h3>חשיבה משפטית ועסקית רחבה</h3>
@@ -1929,7 +2294,7 @@
       </div>
       <div class="why-item reveal reveal-delay-4">
         <div class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
         </div>
         <div>
           <h3>אנושיות לפני הכול</h3>
@@ -1941,7 +2306,7 @@
         <div class="why-cta-text">מוכנים <em>להתחיל את הצעד הראשון?</em></div>
         <a href="tel:0507724404" class="btn btn-primary">
           קביעת ייעוץ ראשוני
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
       </div>
     </div>
@@ -1960,7 +2325,7 @@
     <div class="team-grid">
       <article class="team-member reveal reveal-delay-1">
         <div class="team-photo-wrap">
-          <img src="tamar.jpg" alt="עו״ד תמר שמואלי" onerror="this.outerHTML='<div class=\'team-photo-placeholder\'>ת״ש</div>'" />
+          <img src="tamar.jpg" alt="פורטרט מקצועי של עורכת הדין תמר שמואלי, מייסדת המשרד" onerror="this.outerHTML='<div class=\'team-photo-placeholder\' role=\'img\' aria-label=\'תמר שמואלי\'>ת״ש</div>'" />
         </div>
         <h3 class="team-name">תמר שמואלי</h3>
         <div class="team-role">עו״ד ונוטריון · מייסדת המשרד</div>
@@ -1969,7 +2334,7 @@
 
       <article class="team-member reveal reveal-delay-2">
         <div class="team-photo-wrap">
-          <img src="jomana.jpg" alt="עו״ד ג׳ומאנה עודה" onerror="this.outerHTML='<div class=\'team-photo-placeholder\'>ג״ע</div>'" />
+          <img src="jomana.jpg" alt="פורטרט מקצועי של עורכת הדין ג׳ומאנה עודה" onerror="this.outerHTML='<div class=\'team-photo-placeholder\' role=\'img\' aria-label=\'ג׳ומאנה עודה\'>ג״ע</div>'" />
         </div>
         <h3 class="team-name">ג׳ומאנה עודה</h3>
         <div class="team-role">עורכת דין</div>
@@ -1985,13 +2350,13 @@
     <div class="testimonials-header reveal">
       <span class="eyebrow">המלצות לקוחות</span>
       <h2 class="section-title">המילים <em>שלהם</em>, לא שלנו.</h2>
-      <div class="reviews-rating">
-        <div class="stars">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+      <div class="reviews-rating" role="img" aria-label="דירוג חמישה כוכבים מתוך חמישה, על בסיס ביקורות גוגל מאומתות">
+        <div class="stars" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
         <span class="reviews-rating-text"><strong>5.0</strong> · על בסיס ביקורות גוגל מאומתות</span>
       </div>
@@ -2000,14 +2365,14 @@
     <div class="testimonials-grid">
 
       <article class="testimonial-card reveal reveal-delay-1">
-        <div class="testimonial-stars">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        <div class="testimonial-stars" role="img" aria-label="חמישה כוכבים מתוך חמישה">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
-        <p class="testimonial-text">פעמיים שיצא לי לעשות עסקאות מכירה וקניה של דירת מגורים, ובכל התהליכים האלה תמר היתה לצידי ונתנה את השירות הכי טוב שיכולתי לבקש, בשיא המקצועיות והאנושיות. ממליץ בחום!</p>
+        <blockquote class="testimonial-text">פעמיים שיצא לי לעשות עסקאות מכירה וקניה של דירת מגורים, ובכל התהליכים האלה תמר היתה לצידי ונתנה את השירות הכי טוב שיכולתי לבקש, בשיא המקצועיות והאנושיות. ממליץ בחום!</blockquote>
         <div class="testimonial-author">
           <div class="testimonial-avatar">א</div>
           <div class="testimonial-author-info">
@@ -2018,14 +2383,14 @@
       </article>
 
       <article class="testimonial-card reveal reveal-delay-2">
-        <div class="testimonial-stars">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        <div class="testimonial-stars" role="img" aria-label="חמישה כוכבים מתוך חמישה">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
-        <p class="testimonial-text">אני מכיר את עו״ד תמר יותר מ־30 שנים, וכל עסקת נדל״ן שלי ושל משפחתי עברו דרך טיפולה המסור. טיפול מקצועי ביותר, יחס אנושי, סבלנות, הכוונה נכונה וזמינות.</p>
+        <blockquote class="testimonial-text">אני מכיר את עו״ד תמר יותר מ־30 שנים, וכל עסקת נדל״ן שלי ושל משפחתי עברו דרך טיפולה המסור. טיפול מקצועי ביותר, יחס אנושי, סבלנות, הכוונה נכונה וזמינות.</blockquote>
         <div class="testimonial-author">
           <div class="testimonial-avatar">ע</div>
           <div class="testimonial-author-info">
@@ -2036,14 +2401,14 @@
       </article>
 
       <article class="testimonial-card reveal reveal-delay-3">
-        <div class="testimonial-stars">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        <div class="testimonial-stars" role="img" aria-label="חמישה כוכבים מתוך חמישה">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
-        <p class="testimonial-text">אחרי 3 עורכי דין שלא הצליחו לתת מענה למורכבות מכירת בית הוריי מעין הוד, תמר עשתה עבודה למופת! מכירה היטב את מנהל מקרקעין מחוז חיפה, ידע רב, תקשורת מעולה ועבודה מסורה.</p>
+        <blockquote class="testimonial-text">אחרי 3 עורכי דין שלא הצליחו לתת מענה למורכבות מכירת בית הוריי מעין הוד, תמר עשתה עבודה למופת! מכירה היטב את מנהל מקרקעין מחוז חיפה, ידע רב, תקשורת מעולה ועבודה מסורה.</blockquote>
         <div class="testimonial-author">
           <div class="testimonial-avatar">ג</div>
           <div class="testimonial-author-info">
@@ -2054,14 +2419,14 @@
       </article>
 
       <article class="testimonial-card reveal reveal-delay-1">
-        <div class="testimonial-stars">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        <div class="testimonial-stars" role="img" aria-label="חמישה כוכבים מתוך חמישה">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
-        <p class="testimonial-text">ממליצה בחום על תמר וג׳ומאנה. השירות שקיבלנו היה מקצועי ויסודי, עם ליווי אישי לאורך כל הדרך. הטיפול היה מדויק, אמין ומותאם לצרכים שלנו.</p>
+        <blockquote class="testimonial-text">ממליצה בחום על תמר וג׳ומאנה. השירות שקיבלנו היה מקצועי ויסודי, עם ליווי אישי לאורך כל הדרך. הטיפול היה מדויק, אמין ומותאם לצרכים שלנו.</blockquote>
         <div class="testimonial-author">
           <div class="testimonial-avatar">ד</div>
           <div class="testimonial-author-info">
@@ -2072,14 +2437,14 @@
       </article>
 
       <article class="testimonial-card reveal reveal-delay-2">
-        <div class="testimonial-stars">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        <div class="testimonial-stars" role="img" aria-label="חמישה כוכבים מתוך חמישה">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
-        <p class="testimonial-text">תמר שמואלי היא עורכת דין יוצאת דופן. מקצועיות ברמה הכי גבוהה שיש, יסודיות, חדות מחשבתית ויכולת לנהל כל פרט בצורה מדויקת ומרגיעה. מעבר לידע המשפטי המרשים, היא אנושית.</p>
+        <blockquote class="testimonial-text">תמר שמואלי היא עורכת דין יוצאת דופן. מקצועיות ברמה הכי גבוהה שיש, יסודיות, חדות מחשבתית ויכולת לנהל כל פרט בצורה מדויקת ומרגיעה. מעבר לידע המשפטי המרשים, היא אנושית.</blockquote>
         <div class="testimonial-author">
           <div class="testimonial-avatar">ד</div>
           <div class="testimonial-author-info">
@@ -2090,14 +2455,14 @@
       </article>
 
       <article class="testimonial-card reveal reveal-delay-3">
-        <div class="testimonial-stars">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+        <div class="testimonial-stars" role="img" aria-label="חמישה כוכבים מתוך חמישה">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
-        <p class="testimonial-text">נעזרתי בצוות המקסים של תמר וג׳ומאנה ברכישת ומכירת דירה. היו זמינות לאורך כל התהליך, הנגישו הכל בצורה שמובנת לכל אדם שאינו מהתחום. יחס מהמם, ובזכותן כאב הראש של הבירוקרטיה פשוט נעלם.</p>
+        <blockquote class="testimonial-text">נעזרתי בצוות המקסים של תמר וג׳ומאנה ברכישת ומכירת דירה. היו זמינות לאורך כל התהליך, הנגישו הכל בצורה שמובנת לכל אדם שאינו מהתחום. יחס מהמם, ובזכותן כאב הראש של הבירוקרטיה פשוט נעלם.</blockquote>
         <div class="testimonial-author">
           <div class="testimonial-avatar">ש</div>
           <div class="testimonial-author-info">
@@ -2117,16 +2482,16 @@
       <div class="btns">
         <a href="tel:0507724404" class="btn btn-primary">
           לתיאום שיחה
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </a>
-        <a href="https://wa.me/972507724404" target="_blank" rel="noopener" class="btn btn-outline">בוואטסאפ</a>
+        <a href="https://wa.me/972507724404" target="_blank" rel="noopener noreferrer" class="btn btn-outline" aria-label="שליחת הודעת וואטסאפ למשרד, נפתח בחלון חדש">בוואטסאפ</a>
       </div>
     </div>
 
     <div class="reviews-cta reveal" style="margin-top: 32px;">
-      <a href="https://www.google.com/search?q=%D7%AA%D7%9E%D7%A8+%D7%A9%D7%9E%D7%95%D7%90%D7%9C%D7%99+%D7%A2%D7%95%D7%A8%D7%9B%D7%AA+%D7%93%D7%99%D7%9F" target="_blank" rel="noopener" class="btn btn-outline">
+      <a href="https://www.google.com/search?q=%D7%AA%D7%9E%D7%A8+%D7%A9%D7%9E%D7%95%D7%90%D7%9C%D7%99+%D7%A2%D7%95%D7%A8%D7%9B%D7%AA+%D7%93%D7%99%D7%9F" target="_blank" rel="noopener noreferrer" class="btn btn-outline" aria-label="קריאת כל הביקורות בגוגל על המשרד, נפתח בחלון חדש">
         קריאת כל הביקורות בגוגל
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </a>
     </div>
   </div>
@@ -2141,9 +2506,9 @@
       <p>הצעד הראשון הוא תמיד שיחה. התקשרו או שלחו הודעת וואטסאפ, ונחזור אליכם תוך 24 שעות עם תשובות וכיוון.</p>
 
       <div class="contact-methods">
-        <a href="tel:0507724404" class="contact-method">
+        <a href="tel:0507724404" class="contact-method" aria-label="התקשרות למשרד בטלפון 0507724404">
           <div class="contact-method-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.35 1.9.64 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.29 1.85.51 2.81.64A2 2 0 0122 16.92z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.35 1.9.64 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.29 1.85.51 2.81.64A2 2 0 0122 16.92z"/></svg>
           </div>
           <div class="contact-method-info">
             <span>טלפון</span>
@@ -2151,9 +2516,9 @@
           </div>
         </a>
 
-        <a href="https://wa.me/972507724404" target="_blank" rel="noopener" class="contact-method">
+        <a href="https://wa.me/972507724404" target="_blank" rel="noopener noreferrer" class="contact-method" aria-label="פתיחת שיחת וואטסאפ עם המשרד, נפתח בחלון חדש">
           <div class="contact-method-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.4.4-.5.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.6.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 4.9L2 22l5.2-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.4.4-.5.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.6.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 4.9L2 22l5.2-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
           </div>
           <div class="contact-method-info">
             <span>וואטסאפ</span>
@@ -2161,9 +2526,9 @@
           </div>
         </a>
 
-        <a href="mailto:Tamar@itay.co.il" class="contact-method">
+        <a href="mailto:Tamar@itay.co.il" class="contact-method" aria-label="שליחת אימייל לכתובת Tamar@itay.co.il">
           <div class="contact-method-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </div>
           <div class="contact-method-info">
             <span>אימייל</span>
@@ -2174,8 +2539,8 @@
 
       <h4 style="font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 14px;">עקבו אחרינו</h4>
       <div class="social-row">
-        <a href="https://www.instagram.com/tamarshmuely.law/" target="_blank" rel="noopener" class="social-icon social-instagram" aria-label="אינסטגרם">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"/></svg>
+        <a href="https://www.instagram.com/tamarshmuely.law/" target="_blank" rel="noopener noreferrer" class="social-icon social-instagram" aria-label="עקבו אחרינו באינסטגרם, נפתח בחלון חדש">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01"/></svg>
           <span>@tamarshmuely.law</span>
         </a>
       </div>
@@ -2183,13 +2548,15 @@
   </div>
 </section>
 
+</main>
+
 <!-- ================ FOOTER ================ -->
-<footer>
+<footer role="contentinfo" aria-label="פוטר האתר">
   <div class="container">
     <div class="footer-inner">
       <div>
         <div class="footer-logo-row">
-          <img class="footer-logo-mark" src="logo-mark.png" alt="לוגו תמר שמואלי" />
+          <img class="footer-logo-mark" src="logo-mark.png" alt="" role="presentation" />
           <div class="footer-logo">תמר שמואלי</div>
         </div>
         <p class="footer-tagline">עבודה עם לב, לתוצאות שמחזיקות מעמד.</p>
@@ -2211,9 +2578,9 @@
         <h4>יצירת קשר</h4>
         <ul>
           <li><a href="tel:0507724404" dir="ltr">050-772-4404</a></li>
-          <li><a href="https://wa.me/972507724404" target="_blank" rel="noopener">וואטסאפ</a></li>
+          <li><a href="https://wa.me/972507724404" target="_blank" rel="noopener noreferrer">וואטסאפ</a></li>
           <li><a href="mailto:Tamar@itay.co.il">Tamar@itay.co.il</a></li>
-          <li><a href="https://www.instagram.com/tamarshmuely.law/" target="_blank" rel="noopener">אינסטגרם @tamarshmuely.law</a></li>
+          <li><a href="https://www.instagram.com/tamarshmuely.law/" target="_blank" rel="noopener noreferrer">אינסטגרם @tamarshmuely.law</a></li>
         </ul>
       </div>
     </div>
@@ -2226,8 +2593,8 @@
 </footer>
 
 <!-- Floating WhatsApp -->
-<a href="https://wa.me/972507724404" target="_blank" rel="noopener" class="whatsapp-float" aria-label="וואטסאפ">
-  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.4.4-.5.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.6.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 4.9L2 22l5.2-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+<a href="https://wa.me/972507724404" target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="שליחת הודעת וואטסאפ למשרד, נפתח בחלון חדש">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.4.4-.5.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.6.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 4.9L2 22l5.2-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
 </a>
 
 <script>
@@ -2266,15 +2633,277 @@
   }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
   reveals.forEach(el => io.observe(el));
 
-  // Subtle parallax on hero portrait
+  // ============================================
+  // PRACTICE AREAS MODAL — accessible dialog
+  // ============================================
+  const practiceData = {
+    apartments: {
+      title: 'ייצוג במכר ורכישת דירות יד שנייה',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
+      intro: 'רכישה או מכירה של דירת מגורים היא לרוב העסקה הכספית הגדולה ביותר שתעשו בחיים. כל סעיף בחוזה, כל הערה בטאבו וכל חוב סמוי עלולים לעלות עשרות אלפי שקלים, או למנוע אותם. הליווי שלי מתחיל לפני שאתם חותמים על משהו, ונמשך עד הרישום הסופי של הדירה על שמכם.',
+      steps: [
+        'פגישת ייעוץ ראשונית (ללא עלות) — נכיר את הצדדים, ננתח את הנכס ונבין מה החששות שלכם.',
+        'בדיקה מקיפה: נסח טאבו, היתרי בנייה, חריגות, שעבודים, עיקולים — לפני חתימה על דבר.',
+        'ניהול משא ומתן והכנת הסכם מותאם אישית, עם הגנות לטובתכם.',
+        'ליווי בחתימה, רישום הערת אזהרה והשגחה על העברת התשלומים בהתאם לאבני הדרך.',
+        'דיווחי מס שבח ומס רכישה לרשות המסים, וייצוג מולה במידת הצורך.',
+        'רישום סופי של הזכויות בטאבו על שמכם.'
+      ],
+      review: {
+        quote: 'פעמיים שיצא לי לעשות עסקאות מכירה וקניה של דירת מגורים, ובכל התהליכים האלה תמר היתה לצידי ונתנה את השירות הכי טוב שיכולתי לבקש, בשיא המקצועיות והאנושיות.',
+        author: 'אלירן אברג׳ל',
+        meta: 'לקוח · עסקאות מכירה וקנייה'
+      }
+    },
+    commercial: {
+      title: 'ייצוג במקרקעין מסחריים',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V4h8v3M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg>',
+      intro: 'עסקאות מסחריות שונות מהותית מעסקאות מגורים: סוגי דיירות, שכירויות עסקיות, היתרים תפעוליים, מע״מ ושיקולי ארנונה. צריך גישה משפטית שמדברת גם עברית עסקית, ושמבינה את ההשלכות הכלכליות לטווח הארוך.',
+      steps: [
+        'ניתוח כלכלי-משפטי ראשוני של הנכס והעסקה.',
+        'בדיקת היתרים תפעוליים, סוגי שימוש מותרים, ארנונה והתחייבויות סטטוטוריות.',
+        'ניסוח חוזה רכישה או שכירות עם הגנות עסקיות מותאמות.',
+        'ליווי מס מקרקעין מיוחד לעסקאות מסחריות (כולל מע״מ).',
+        'ליווי בחתימה, רישום וטיפול בהיתרים נדרשים מול הרשויות.'
+      ],
+      review: {
+        quote: 'עשינו מספר חוזים ומסמכים משפטיים עם עו״ד תמר שמואלי. התרשמנו מהעבודה האחראית, המדוייקת, האנושית והיעילה. התקשורת איתה הייתה נוחה ויעילה.',
+        author: 'מאיר שמואלוף',
+        meta: 'לקוח · חוזים ומסמכים משפטיים'
+      }
+    },
+    tax: {
+      title: 'מיסוי מקרקעין וייעוץ מס',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/><circle cx="17" cy="16" r="2"/></svg>',
+      intro: 'מס שבח, מס רכישה, פטורים, חישובים לינאריים, מתנות בין קרובים — תכנון מס נכון יכול לחסוך עשרות אלפי שקלים, לפעמים יותר. הייעוץ חייב להגיע לפני העסקה, לא אחריה.',
+      steps: [
+        'סימולציית מס מקדימה — חישוב צפוי לכל תרחיש שאתם שוקלים.',
+        'בדיקת זכאות לפטורים (דירה יחידה, מתנה, ירושה, פינוי-בינוי וכו׳).',
+        'תכנון אופטימלי של מועדי עסקה ופיצול עסקאות לחיסכון מקסימלי.',
+        'הכנת והגשת דיווחי מס שבח ומס רכישה בזמן.',
+        'ייצוג מול רשות המסים אם מתעוררות מחלוקות או דרישות נוספות.'
+      ],
+      review: {
+        quote: 'תמר שמואלי היא עורכת דין יוצאת דופן. מקצועיות ברמה הכי גבוהה שיש, יסודיות, חדות מחשבתית ויכולת לנהל כל פרט בצורה מדויקת ומרגיעה.',
+        author: 'דורון ועדי בהרב',
+        meta: 'לקוחות · ליווי משפטי מקיף'
+      }
+    },
+    estate: {
+      title: 'הסכמי ממון וחלוקת עיזבון',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1 1-2 3-2s3 1 3 2-1 1.5-3 2.5-3 1.5-3 2.5 1 2 3 2 3-1 3-2"/></svg>',
+      intro: 'הסכמי ממון מגנים על שני הצדדים, הסכמי חלוקת עיזבון מונעים סכסוכים משפחתיים. שני המסמכים האלה דורשים רגישות, סבלנות וגישה אנושית — לא רק משפטית. אצלי כל הצדדים מקבלים מקום להישמע.',
+      steps: [
+        'שיחה אישית עם כל הצדדים, הקשבה לחששות ולרצונות.',
+        'ייעוץ משפטי מותאם לסיטואציה (זוגיות, ירושה, פירוק שיתוף).',
+        'ניסוח הסכם בלשון ברורה ושוויונית.',
+        'אישור בית המשפט (להסכמי ממון) או חתימת כל היורשים.',
+        'שמירת המסמך ותיוקו במאגרים המתאימים.'
+      ],
+      review: {
+        quote: 'אני ממליצה בחום על עורכת הדין שמלווה אותנו כבר מספר שנים במקצועיות רבה, יסודיות ואחריות. לאורך כל הדרך היא מפגינה ידע משפטי רחב, זמינות גבוהה ויחס אישי ואיכפתי.',
+        author: 'לירון גלעזר',
+        meta: 'לקוחה ותיקה · ליווי לאורך שנים'
+      }
+    },
+    wills: {
+      title: 'ייפוי כוח מתמשך וצוואות',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20h14M7 16l9-9 3 3-9 9-3-3z M14 5l3 3"/><path d="M9 16H6v-3"/></svg>',
+      intro: 'לדאוג לעתידכם ולמשפחתכם מראש זו אחת המתנות הגדולות שאתם יכולים לתת. ייפוי כוח מתמשך נכנס לתוקף כשאינכם יכולים יותר לקבל החלטות, וצוואה מסדרת את חלוקת הנכסים שלכם בלי מאבקים. בשני המקרים, ההכנה הנכונה היא ההגנה הטובה ביותר.',
+      steps: [
+        'פגישת ייעוץ אישית ללא לחץ זמן (בדרך כלל 60-90 דקות).',
+        'הסבר על ההבדל בין ייפוי כוח מתמשך, צוואה רגילה וצוואה הדדית.',
+        'ניסוח המסמך לפי רצונותיכם המדויקים, כולל הנחיות מקדימות.',
+        'חתימה אצל נוטריון מוסמכת באותה הפגישה.',
+        'הפקדה במאגר הצוואות של רשם הירושות / רשם ייפוי הכוח.'
+      ],
+      review: {
+        quote: 'ממליץ מאד על עו״ד תמר שמואלי. תמר מקצועית, עיניינית, יסודית, יודעת להבדיל בין החשוב לפחות חשוב, זמינות גבוהה, וגם אדם נעים מאד.',
+        author: 'אביגדור רוזנברג',
+        meta: 'לקוח · ליווי משפטי'
+      }
+    },
+    urban: {
+      title: 'התחדשות עירונית ותמ״א 38',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V9l6-4 6 4v12"/><path d="M9 21V13h6v8M12 9v0M10 17h4"/></svg>',
+      intro: 'פרויקטים של התחדשות עירונית ותמ״א 38 מורכבים: תהליכים ארוכים, יחסי כוחות לא שווים מול היזם, וצורך בליווי משפטי בכל שלב. בעלי הדירות זקוקים לעורכת דין שמייצגת אותם — לא את היזם, ולא משרד שעובד לשני הצדדים.',
+      steps: [
+        'ייעוץ ראשוני לפני חתימה — הבנת התמורות, הסיכונים ולוחות הזמנים האמיתיים.',
+        'ייצוג נציגות הדיירים מול היזם, כולל בחירת היזם הנכון.',
+        'ניסוח הסכם תמ״א / פינוי-בינוי מאוזן, עם ערבויות ראויות.',
+        'ליווי בשלבי התכנון, ההיתרים והבנייה.',
+        'רישום הזכויות החדשות שלכם בטאבו אחרי סיום הפרויקט.'
+      ],
+      review: {
+        quote: 'היתה לי זכות גדולה לקבל את שירותי עריכת הדין מ עו״ד תמר שמואלי. אחרי 3 עורכי דין שלא הצליחו לתת מענה למורכבות מכירת בית הוריי מעין הוד, תמר עשתה עבודה למופת. מכירה היטב את מנהל מקרקעין מחוז חיפה, ייצגה אותנו תוך תקשורת מעולה.',
+        author: 'גיורא',
+        meta: 'Local Guide · גוגל · ייצוג מורכב מול הרשויות'
+      }
+    },
+    contractor: {
+      title: 'ייצוג ברכישה מקבלן',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 014 4v1H8V6a4 4 0 014-4z"/><path d="M5 9h14l-1 12H6L5 9zM10 13v4M14 13v4"/></svg>',
+      intro: 'רכישה מקבלן נראית "פשוטה" אבל החוזה שהקבלן מציע הוא חוזה שמטרתו להגן עליו — לא עליכם. צריך עורכת דין שתעבור על כל סעיף, תנהל מו״מ אמיתי על שינויים, ותלווה אתכם לאורך כל הבנייה עד קבלת המפתח.',
+      steps: [
+        'בדיקת חוזה הרכישה והנספחים (לרוב 100+ עמודים מורכבים).',
+        'בדיקת היזם, היתרי בנייה, התחייבויות בנקאיות וערבויות חוק מכר.',
+        'ניהול משא ומתן על שינויים, סיומים, ערבויות ולוחות הסכמי תשלומים.',
+        'ליווי לאורך הבנייה — מעקב אחרי לוחות זמנים והתחייבויות.',
+        'בדיקה לפני קבלת מפתח, רישום בית משותף ורישום הזכויות בטאבו.'
+      ],
+      review: {
+        quote: 'נעזרתי בצוות המקסים של תמר וג׳ומאנה ברכישת ומכירת דירה. היו זמינות אליי לכל אורך התהליך, הנגישו הכל בצורה שמובנת לכל אדם שאינו מהתחום. יחס מהמם, כאב הראש של הבירוקרטיה במעבר דירה היה פשוט בזכותכן.',
+        author: 'שני אבו',
+        meta: 'לקוחה · רכישה ומכירה'
+      }
+    },
+    notary: {
+      title: 'שירותי נוטריון',
+      iconColor: 'var(--copper)',
+      iconPath: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5"/><path d="M12 14v7M8 21h8"/><path d="M12 9l2 2"/></svg>',
+      intro: 'כעו״ד נוטריונית מוסמכת, אני מספקת את כל מגוון השירותים הנוטריונים. כל מסמך עובר בדיקה משפטית מקצועית לפני האישור — לא רק חתימה אוטומטית. זמינות גבוהה ואפשרות לפגישות בהתראה קצרה.',
+      steps: [
+        'תיאום פגישה תוך 24-48 שעות, גם במקרים דחופים.',
+        'הצגת תעודות זהות והחומרים הרלוונטיים.',
+        'בדיקה משפטית של המסמך לפני האישור (לא רק חותמת).',
+        'אישור וחתימה נוטריוניים באותו מעמד.',
+        'קבלת המסמך החתום, הסבר על תוקפו ושימושו.'
+      ],
+      review: {
+        quote: 'מיקצועית, זמינה, אמינה ותמיד בגובה העיניים. מומלצת.',
+        author: 'עפרה דקל',
+        meta: 'לקוחה · שירותי נוטריון'
+      }
+    }
+  };
+
+  const modal = document.getElementById('practiceModal');
+  const modalTitle = document.getElementById('practiceModalTitle');
+  const modalIcon = document.getElementById('practiceModalIcon');
+  const modalIntro = document.getElementById('practiceModalIntro');
+  const modalSteps = document.getElementById('practiceModalSteps');
+  const modalReview = document.getElementById('practiceModalReview');
+  const modalReviewQuote = document.getElementById('practiceModalReviewQuote');
+  const modalReviewAuthor = document.getElementById('practiceModalReviewAuthor');
+
+  let lastFocusedCard = null;
+
+  function openPracticeModal(practiceId) {
+    const data = practiceData[practiceId];
+    if (!data) return;
+
+    lastFocusedCard = document.activeElement;
+
+    modalTitle.textContent = data.title;
+    modalIcon.innerHTML = data.iconPath;
+    modalIntro.textContent = data.intro;
+
+    modalSteps.innerHTML = '';
+    data.steps.forEach(step => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      modalSteps.appendChild(li);
+    });
+
+    if (data.review) {
+      modalReviewQuote.textContent = data.review.quote;
+      modalReviewAuthor.innerHTML = '<strong>' + data.review.author + '</strong> · ' + data.review.meta;
+      modalReview.hidden = false;
+    } else {
+      modalReview.hidden = true;
+    }
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    // Move focus into modal
+    setTimeout(() => {
+      modal.querySelector('.practice-modal-close')?.focus();
+    }, 50);
+  }
+
+  function closePracticeModal() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    // Return focus to the card that opened the modal
+    if (lastFocusedCard) lastFocusedCard.focus();
+  }
+
+  // Open modal on card click / Enter / Space
+  document.querySelectorAll('.practice-card[data-practice]').forEach(card => {
+    const open = () => openPracticeModal(card.dataset.practice);
+    card.addEventListener('click', (e) => {
+      // Don't open if clicking the inner "תיאום פגישה" button on notary card
+      if (e.target.closest('.btn')) return;
+      open();
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
+
+  // Close handlers
+  modal.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', closePracticeModal);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closePracticeModal();
+  });
+
+  // Focus trap inside modal (keep Tab cycling within)
+  modal.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || !modal.classList.contains('open')) return;
+    const focusable = modal.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])');
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+  // Subtle parallax on hero portrait — disabled for reduced-motion users & touch devices
   const heroPortrait = document.querySelector('.hero-portrait');
-  if (heroPortrait && window.matchMedia('(min-width: 1024px)').matches) {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (heroPortrait && isFinePointer && !prefersReducedMotion && window.matchMedia('(min-width: 1024px)').matches) {
     window.addEventListener('mousemove', (e) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 8;
       const y = (e.clientY / window.innerHeight - 0.5) * 8;
       heroPortrait.style.transform = `translate(${x}px, ${y}px)`;
     });
   }
+
+  // Close mobile menu with Escape key for keyboard users
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navLinks?.classList.contains('mobile-open')) {
+      navLinks.classList.remove('mobile-open');
+      menuToggle.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.focus();
+    }
+  });
+
+  // Sync aria-expanded on hamburger toggle for screen-reader users
+  menuToggle?.addEventListener('click', () => {
+    const isOpen = navLinks.classList.contains('mobile-open');
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+  });
 </script>
 
 </body>
